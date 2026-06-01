@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cairn University — Site Monitor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <svg class="brand-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="20" fill="#7a1f2e"/>
+          <path d="M20 8 L28 20 L20 32 L12 20 Z" fill="white" opacity="0.9"/>
+        </svg>
+        <div>
+          <span class="brand-name">Cairn University</span>
+          <span class="brand-sub">Technology Services · Site Monitor</span>
+        </div>
+      </div>
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        LIVE
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Summary bar -->
+    <section class="summary-bar">
+      <div class="summary-card">
+        <span class="summary-value" id="stat-total">—</span>
+        <span class="summary-label">Total Sites</span>
+      </div>
+      <div class="summary-card up">
+        <span class="summary-value" id="stat-up">—</span>
+        <span class="summary-label">Online</span>
+      </div>
+      <div class="summary-card down">
+        <span class="summary-value" id="stat-down">—</span>
+        <span class="summary-label">Offline</span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-value" id="stat-avg">—</span>
+        <span class="summary-label">Avg Response</span>
+      </div>
+      <div class="summary-card">
+        <span class="summary-value" id="stat-updated">—</span>
+        <span class="summary-label">Last Updated</span>
+      </div>
+    </section>
+
+    <!-- Status cards -->
+    <section class="cards-section">
+      <h2 class="section-title">Site Status</h2>
+      <div class="cards-grid" id="cards-grid">
+        <!-- injected by app.js -->
+      </div>
+    </section>
+
+    <!-- Detail table -->
+    <section class="table-section">
+      <h2 class="section-title">Details</h2>
+      <div class="table-wrapper">
+        <table id="results-table">
+          <thead>
+            <tr>
+              <th>Site</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>HTTP Code</th>
+              <th>Response Time</th>
+              <th>Last Checked</th>
+            </tr>
+          </thead>
+          <tbody id="results-body">
+            <!-- injected by app.js -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>Cairn University Technology Services &mdash; Internal Use Only</span>
+    <span id="footer-clock"></span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

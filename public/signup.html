@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cairn University — Create Account</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="login-page">
+
+  <div class="login-wrapper">
+    <div class="login-card">
+
+      <div class="login-brand">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+          <circle cx="20" cy="20" r="20" fill="#7a1f2e"/>
+          <path d="M20 8 L28 20 L20 32 L12 20 Z" fill="white" opacity="0.9"/>
+        </svg>
+        <div>
+          <div class="login-brand-name">Cairn University</div>
+          <div class="login-brand-sub">Technology Services · Site Monitor</div>
+        </div>
+      </div>
+
+      <h1 class="login-title">Create account</h1>
+      <p class="login-desc">You'll need your TS department invite code to register.</p>
+
+      <div id="error-msg" class="error-banner" style="display:none"></div>
+
+      <form method="POST" action="/signup" class="login-form">
+        <div class="field">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" autocomplete="name" placeholder="e.g. Joy Sulaiman" required />
+        </div>
+        <div class="field">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" autocomplete="username" placeholder="e.g. jsulaiman" required />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" autocomplete="new-password" placeholder="At least 8 characters" required />
+        </div>
+        <div class="field">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required />
+        </div>
+        <div class="field">
+          <label for="inviteCode">Invite Code</label>
+          <input type="text" id="inviteCode" name="inviteCode" placeholder="Enter your TS invite code" required />
+        </div>
+        <button type="submit" class="login-btn">Create Account</button>
+      </form>
+
+    </div>
+
+    <p class="login-footer">
+      Already have an account? <a href="/login" class="auth-link">Sign in</a>
+    </p>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const err    = params.get("error");
+    const banner = document.getElementById("error-msg");
+    const messages = {
+      missing:  "All fields are required.",
+      badcode:  "Invalid invite code. Contact your TS administrator.",
+      mismatch: "Passwords do not match.",
+      short:    "Password must be at least 8 characters.",
+      taken:    "That username is already taken. Please choose another.",
+      server:   "A server error occurred. Please try again.",
+    };
+    if (err && messages[err]) {
+      banner.textContent = messages[err];
+      banner.style.display = "block";
+    }
+  </script>
+</body>
+</html>
