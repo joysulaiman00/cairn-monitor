@@ -483,7 +483,7 @@ body.login-page {
 
 .login-footer {
   font-size: 0.72rem;
-  color: var(--muted);
+  color: white;
   text-align: center;
 }
 
