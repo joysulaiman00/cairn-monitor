@@ -53,14 +53,10 @@ router.get("/signup", requireGuest, (req, res) => {
 
 // POST /signup
 router.post("/signup", requireGuest, async (req, res) => {
-  const { name, username, password, confirmPassword, inviteCode } = req.body;
+  const { name, username, password, confirmPassword } = req.body;
 
-  if (!name || !username || !password || !confirmPassword || !inviteCode) {
+  if (!name || !username || !password || !confirmPassword) {
     return res.redirect("/signup?error=missing");
-  }
-
-  if (inviteCode.trim() !== process.env.INVITE_CODE) {
-    return res.redirect("/signup?error=badcode");
   }
 
   if (password !== confirmPassword) {
