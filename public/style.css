@@ -10,7 +10,7 @@
   --down:       #ef4444;
   --down-bg:    #2d0707;
   --bg:         #0b0f1a;
-  --surface:    #131929;
+  --surface:    #ffffff;
   --surface2:   #1c2438;
   --border:     #222d45;
   --text:       #e2e8f0;
@@ -410,7 +410,7 @@ body.login-page {
 .login-title {
   font-size: 1.6rem;
   font-weight: 700;
-  color: #fff;
+  color: #000000;
   margin-bottom: -0.5rem;
 }
 
