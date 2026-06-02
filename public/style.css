@@ -380,7 +380,7 @@ body.login-page {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 2.5rem 2rem;
+  padding: 2.4rem 1.4rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
