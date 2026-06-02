@@ -63,14 +63,20 @@ const sessionMiddleware = session({
 });
 app.use(sessionMiddleware);
 
-// Auth routes (login/logout)
-app.use(authRouter);
-
-// Serve static dashboard files
+// Serve only public assets (CSS + client JS) — no auth required
 app.use("/style.css", express.static(path.join(__dirname, "public/style.css")));
+app.use("/app.js",    express.static(path.join(__dirname, "public/app.js")));
+
+// Auth routes (login/logout/signup)
+app.use(authRouter);
 
 // Protect everything below this line
 app.use(requireAuth);
+
+// Serve dashboard
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public/index.html"));
+});
 
 // ─── HTTP + WebSocket server ──────────────────────────────────────────────────
 
