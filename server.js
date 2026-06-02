@@ -67,7 +67,7 @@ app.use(sessionMiddleware);
 app.use(authRouter);
 
 // Serve static dashboard files
-app.use(express.static(path.join(__dirname, "public")));
+app.use("/style.css", express.static(path.join(__dirname, "public/style.css")));
 
 // Protect everything below this line
 app.use(requireAuth);
