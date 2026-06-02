@@ -66,11 +66,11 @@ app.use(sessionMiddleware);
 // Auth routes (login/logout)
 app.use(authRouter);
 
-// Protect everything below this line
-app.use(requireAuth);
-
 // Serve static dashboard files
 app.use(express.static(path.join(__dirname, "public")));
+
+// Protect everything below this line
+app.use(requireAuth);
 
 // ─── HTTP + WebSocket server ──────────────────────────────────────────────────
 
