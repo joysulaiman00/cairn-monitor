@@ -35,6 +35,7 @@ header {
   height: 64px;
   display: flex;
   align-items: center;
+  position: relative;
 }
 
 .header-inner {
@@ -80,6 +81,9 @@ header {
   letter-spacing: 0.12em;
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .live-dot {
@@ -494,3 +498,13 @@ body.login-page {
 }
 
 .auth-link:hover { text-decoration: underline; }
+
+
+/* ── Logout Button ───────────────────────────────────────────────── */
+.logout-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
