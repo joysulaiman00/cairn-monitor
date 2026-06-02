@@ -13,8 +13,8 @@
   --surface:    #ffffff;
   --surface2:   #1c2438;
   --border:     #222d45;
-  --text:       #e2e8f0;
-  --muted:      #64748b;
+  --text:       #000000;
+  --muted:      #000000;
   --font:       'Segoe UI', system-ui, sans-serif;
 }
 
@@ -63,7 +63,7 @@ header {
 .brand-sub {
   display: block;
   font-size: 0.72rem;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255, 255, 255, 0);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
