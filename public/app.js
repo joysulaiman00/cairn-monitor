@@ -162,6 +162,15 @@ function connect() {
       updateRow(msg.result);
       updateSummary(results);
     }
+
+    if (msg.type === "delete") {
+      delete results[msg.siteId];
+      const oldCard = document.getElementById(`card-${msg.siteId}`);
+      if (oldCard) oldCard.remove();
+      const oldRow = document.getElementById(`row-${msg.siteId}`);
+      if (oldRow) oldRow.remove();
+      updateSummary(results);
+    }
   });
 
   ws.addEventListener("close", () => {

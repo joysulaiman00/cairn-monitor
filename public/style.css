@@ -195,11 +195,214 @@ main {
   transform: translateY(-1px);
 }
 
+.primary-btn,
+.secondary-btn,
+.danger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0.75rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.primary-btn {
+  background: var(--maroon);
+  color: white;
+}
+
+.primary-btn:hover {
+  background: var(--maroon-lt);
+  transform: translateY(-1px);
+}
+
+.danger-btn {
+  background: rgba(239,68,68,0.12);
+  color: var(--down);
+  border-color: rgba(239,68,68,0.3);
+}
+
+.danger-btn:hover {
+  background: rgba(239,68,68,0.18);
+  transform: translateY(-1px);
+}
+
 .manage-panel {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.8rem;
+}
+
+.manage-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.manage-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.form-actions {
+  align-items: end;
+  justify-content: space-between;
+}
+
+.form-actions .checkbox-label {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.5rem;
+  color: #fff;
+}
+
+.form-row label {
+  display: grid;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.form-row input[type="text"],
+.form-row input[type="url"],
+.form-row input[type="number"] {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: white;
+  padding: 0.8rem 0.95rem;
+}
+
+.manage-table-wrapper {
+  overflow-x: auto;
+}
+
+.manage-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.manage-table th,
+.manage-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.manage-table th {
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.manage-table tbody tr {
+  background: var(--surface);
+}
+
+.manage-table tbody tr:hover {
+  background: var(--surface2);
+}
+
+.manage-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: white;
+  padding: 0.6rem 0.75rem;
+}
+
+.checkbox-label input {
+  width: auto;
+}
+
+.action-cell {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.empty-state {
+  color: var(--muted);
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.message-banner {
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+  font-weight: 600;
+}
+
+.message-banner.info {
+  background: rgba(34,197,94,0.12);
+  color: var(--up);
+}
+
+.message-banner.error {
+  background: rgba(239,68,68,0.12);
+  color: var(--down);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.confirm-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  z-index: 50;
+}
+
+.confirm-box {
+  width: min(520px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1.75rem;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+}
+
+.confirm-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.85rem;
+}
+
+.confirm-message {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .manage-note {

@@ -15,9 +15,9 @@ const rateLimit   = require("express-rate-limit");
 const { WebSocketServer } = require("ws");
 
 // App-specific configuration and middleware.
-const sites      = require("./config/sites");
 const authRouter = require("./routes/auth");
 const { requireAuth } = require("./middleware/auth");
+const SITES_FILE = path.join(__dirname, "config/sites.json");
 
 // App constants.
 const PORT     = process.env.PORT || 3000;
@@ -96,6 +96,87 @@ app.get("/manage-sites", (req, res) => {
   res.sendFile(path.join(__dirname, "pages/manage-sites.html"));
 });
 
+app.get("/api/sites", (req, res) => {
+  res.json(sites);
+});
+
+app.post("/api/sites", (req, res) => {
+  const { name, url, category, checkInterval, expectedStatus, timeout, enabled } = req.body;
+
+  if (!name || !url) {
+    return res.status(400).json({ message: "Name and URL are required." });
+  }
+
+  const site = {
+    id: `site-${Date.now()}`,
+    name: name.trim(),
+    url: url.trim(),
+    category: (category || "other").trim(),
+    checkInterval: Number(checkInterval) || 60,
+    expectedStatus: Number(expectedStatus) || 200,
+    timeout: Number(timeout) || 10000,
+    enabled: enabled !== false,
+  };
+
+  sites.push(site);
+  saveSites(sites);
+  scheduleChecks();
+  res.status(201).json(site);
+});
+
+app.put("/api/sites/:id", (req, res) => {
+  const siteId = req.params.id;
+  const site = sites.find((item) => item.id === siteId);
+  if (!site) {
+    return res.status(404).json({ message: "Site not found." });
+  }
+
+  const { name, url, category, checkInterval, expectedStatus, timeout, enabled } = req.body;
+  if (!name || !url) {
+    return res.status(400).json({ message: "Name and URL are required." });
+  }
+
+  site.name = name.trim();
+  site.url = url.trim();
+  site.category = (category || "other").trim();
+  site.checkInterval = Number(checkInterval) || 60;
+  site.expectedStatus = Number(expectedStatus) || 200;
+  site.timeout = Number(timeout) || 10000;
+  site.enabled = enabled !== false;
+
+  saveSites(sites);
+  scheduleChecks();
+
+  const existing = latestResults[site.id];
+  if (existing) {
+    Object.assign(existing, {
+      name: site.name,
+      url: site.url,
+      category: site.category,
+      expectedStatus: site.expectedStatus,
+    });
+    broadcast({ type: "update", result: existing });
+  }
+
+  res.json(site);
+});
+
+app.delete("/api/sites/:id", (req, res) => {
+  const siteId = req.params.id;
+  const index = sites.findIndex((item) => item.id === siteId);
+  if (index === -1) {
+    return res.status(404).json({ message: "Site not found." });
+  }
+
+  sites.splice(index, 1);
+  saveSites(sites);
+  delete latestResults[siteId];
+  broadcast({ type: "delete", siteId });
+  scheduleChecks();
+
+  res.json({ deleted: true });
+});
+
 // ─── HTTP + WebSocket server ──────────────────────────────────────────────────
 
 const httpServer = http.createServer(app);
@@ -130,7 +211,28 @@ wss.on("connection", (ws) => {
 // ─── In-memory state ──────────────────────────────────────────────────────────
 
 const latestResults = {};
+let sites = loadSites();
+let schedulerIntervals = [];
 
+function loadSites() {
+  if (!fs.existsSync(SITES_FILE)) return [];
+  try {
+    return JSON.parse(fs.readFileSync(SITES_FILE, "utf8"));
+  } catch (err) {
+    console.error("Failed to load sites:", err);
+    return [];
+  }
+}
+
+function saveSites(siteList) {
+  fs.writeFileSync(SITES_FILE, JSON.stringify(siteList, null, 2), "utf8");
+  return siteList;
+}
+
+function clearSchedule() {
+  for (const id of schedulerIntervals) clearInterval(id);
+  schedulerIntervals = [];
+}
 // ─── Data persistence ─────────────────────────────────────────────────────────
 
 function monthlyFilename() {
@@ -238,6 +340,7 @@ function checkSite(site) {
 // ─── Scheduler ────────────────────────────────────────────────────────────────
 
 function scheduleChecks() {
+  clearSchedule();
   const byInterval = {};
   for (const site of sites) {
     if (!site.enabled) continue;
@@ -246,7 +349,8 @@ function scheduleChecks() {
   }
   for (const [intervalSecs, group] of Object.entries(byInterval)) {
     for (const site of group) checkSite(site);
-    setInterval(() => { for (const site of group) checkSite(site); }, Number(intervalSecs) * 1000);
+    const intervalId = setInterval(() => { for (const site of group) checkSite(site); }, Number(intervalSecs) * 1000);
+    schedulerIntervals.push(intervalId);
     console.log(`[scheduler] Polling every ${intervalSecs}s: ${group.map(s => s.name).join(", ")}`);
   }
 }
