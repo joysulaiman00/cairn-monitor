@@ -1,6 +1,7 @@
 /* ── Reset & base ─────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Color and typography variables used throughout the app. */
 :root {
   --maroon:     #7a1f2e;
   --maroon-dk:  #5a1620;
@@ -360,8 +361,7 @@ footer {
 
 .flash { animation: flash 0.8s ease-out; }
 
-/* ── Login page ──────────────────────────────────────────────────────────── */
-body.login-page {
+/* ── Login page ──────────────────────────────────────────────────────────── *//* Styles used by both login and signup pages. */body.login-page {
   display: flex;
   align-items: center;
   justify-content: center;

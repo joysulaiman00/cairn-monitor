@@ -1,23 +1,30 @@
+// Load environment variables from .env into process.env.
 require("dotenv").config();
 
+// Node built-in modules for network, filesystem, and path handling.
 const https       = require("https");
 const http        = require("http");
 const fs          = require("fs");
 const path        = require("path");
+
+// Server and security dependencies.
 const express     = require("express");
 const helmet      = require("helmet");
 const session     = require("express-session");
 const rateLimit   = require("express-rate-limit");
 const { WebSocketServer } = require("ws");
 
+// App-specific configuration and middleware.
 const sites      = require("./config/sites");
 const authRouter = require("./routes/auth");
 const { requireAuth } = require("./middleware/auth");
 
+// App constants.
 const PORT     = process.env.PORT || 3000;
 const DATA_DIR = path.join(__dirname, "data");
 const RETENTION_MONTHS = 3;
 
+// Use a fixed user-agent to reduce variability in remote server responses.
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
@@ -25,9 +32,11 @@ const USER_AGENT =
 
 const app = express();
 
+// Serve public static files from the public directory.
+// `index: false` prevents Express from automatically serving index.html for root.
 app.use(express.static(path.join(__dirname, "public"), { index: false }));
 
-
+// Security headers and Content Security Policy.
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -39,10 +48,11 @@ app.use(helmet({
   },
 }));
 
+// Body parsing for form submissions and JSON payloads.
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Rate limit login attempts: max 10 per 15 minutes per IP
+// Rate limit login attempts to reduce brute-force risk.
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -52,7 +62,8 @@ const loginLimiter = rateLimit({
 });
 app.use("/login", loginLimiter);
 
-// Sessions — one shared instance so the WS upgrade uses the same store
+// Session middleware. This stores sessions in memory by default.
+// For production use, replace with a proper store.
 const sessionMiddleware = session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -66,17 +77,17 @@ const sessionMiddleware = session({
 });
 app.use(sessionMiddleware);
 
-// Serve only public assets (CSS + client JS) — no auth required
+// Explicitly expose CSS and client JS files with no auth restrictions.
 app.use("/style.css", express.static(path.join(__dirname, "public/style.css")));
 app.use("/app.js",    express.static(path.join(__dirname, "public/app.js")));
 
-// Auth routes (login/logout/signup)
+// Mount authentication routes: login, signup, and logout.
 app.use(authRouter);
 
-// Protect everything below this line
+// All routes below this middleware require an authenticated user.
 app.use(requireAuth);
 
-// Serve dashboard
+// Dashboard route, served only to authenticated users.
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public/index.html"));
 });

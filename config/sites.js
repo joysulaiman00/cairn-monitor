@@ -1,3 +1,5 @@
+// Define the list of sites the monitor checks.
+// Each entry is used by the polling engine and displayed in the dashboard.
 const sites = [
   {
     id: "cairn-main",

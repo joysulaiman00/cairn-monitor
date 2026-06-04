@@ -8,6 +8,7 @@
 </head>
 <body>
 
+  <!-- Dashboard shell for authenticated users. -->
   <header>
     <div class="header-inner">
       <div class="brand">
@@ -25,9 +26,10 @@
         LIVE
         
       </div>
-       <form action="/logout" method="POST">
-  <button type="submit" class="logout-btn">Logout</button>
-        </form>
+      <!-- Logout form posts to the server and ends the session. -->
+      <form action="/logout" method="POST">
+        <button type="submit" class="logout-btn">Logout</button>
+      </form>
     </div>
   </header>
 

@@ -1,6 +1,8 @@
+// Elements for the dynamic dashboard.
 const cardsGrid   = document.getElementById("cards-grid");
 const resultsBody = document.getElementById("results-body");
 
+// Summary statistics in the top bar.
 const statTotal   = document.getElementById("stat-total");
 const statUp      = document.getElementById("stat-up");
 const statDown    = document.getElementById("stat-down");
@@ -126,8 +128,10 @@ function updateRow(result) {
 
 // ─── WebSocket ────────────────────────────────────────────────────────────────
 
+// Stores the current site results in memory for rendering and summary updates.
 let results = {};
 
+// Connect to the server's WebSocket endpoint and update the UI with live events.
 function connect() {
   const protocol = location.protocol === "https:" ? "wss:" : "ws:";
   const ws = new WebSocket(`${protocol}//${location.host}`);
@@ -140,6 +144,7 @@ function connect() {
     const msg = JSON.parse(event.data);
 
     if (msg.type === "init") {
+      // Initial payload includes the current state for all monitored sites.
       results = msg.sites;
       cardsGrid.innerHTML   = "";
       resultsBody.innerHTML = "";
@@ -151,6 +156,7 @@ function connect() {
     }
 
     if (msg.type === "update") {
+      // Incremental update for a single site.
       results[msg.result.siteId] = msg.result;
       updateCard(msg.result);
       updateRow(msg.result);
