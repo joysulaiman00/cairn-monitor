@@ -64,7 +64,7 @@ function buildCard(result) {
   card.innerHTML = `
     <div class="card-top">
       <div>
-        <div class="card-name">${result.name}</div>
+        <a class="card-name" href="${result.url}" target="_blank">${result.name}</a>
         <div class="card-category">${result.category}</div>
       </div>
       <span class="status-badge ${f.statusClass}">${f.statusText}</span>

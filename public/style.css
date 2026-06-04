@@ -158,6 +158,63 @@ main {
 }
 
 /* ── Status cards ────────────────────────────────────────────────────────── */
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.section-description {
+  margin-top: 0.4rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
+  color: white;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.secondary-btn:hover {
+  background: rgba(255,255,255,0.16);
+  transform: translateY(-1px);
+}
+
+.manage-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.8rem;
+}
+
+.manage-note {
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.manage-placeholder {
+  padding: 1.3rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px dashed rgba(255,255,255,0.16);
+  color: white;
+}
+
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
