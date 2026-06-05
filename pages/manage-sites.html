@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Monitored Sites</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <img src="/images/Cairn_Logo_337_X_100.webp" alt="Cairn University Logo" style="height: 48px; width: auto;">
+        <div></div>
+      </div>
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        LIVE
+      </div>
+      <form action="/logout" method="POST">
+        <button type="submit" class="logout-btn">Logout</button>
+      </form>
+    </div>
+  </header>
+
+  <main>
+    <section class="cards-section">
+      <div class="section-heading">
+        <div>
+          <h2 class="section-title">Manage Monitored Sites</h2>
+          <p class="section-description">Add, remove, or update the URLs the monitor checks.</p>
+        </div>
+        <a href="/" class="secondary-btn">Back to Dashboard</a>
+      </div>
+
+      <div class="manage-grid">
+        <div class="manage-panel">
+          <div class="section-description">
+            Add or update monitoring targets and control whether each site is currently enabled.
+          </div>
+          <form id="add-site-form" class="manage-form">
+            <div class="form-row">
+              <label>Name<input type="text" name="name" placeholder="Site name" required /></label>
+              <label>URL<input type="url" name="url" placeholder="https://example.com" required /></label>
+            </div>
+            <div class="form-row">
+              <label>Category<input type="text" name="category" placeholder="main, apps, student-services" /></label>
+              <label>Expected Status<input type="number" name="expectedStatus" min="100" max="599" value="200" /></label>
+            </div>
+            <div class="form-row">
+              <label>Check Interval (s)<input type="number" name="checkInterval" min="10" value="60" /></label>
+              <label>Timeout (ms)<input type="number" name="timeout" min="1000" value="10000" /></label>
+            </div>
+            <div class="form-row form-actions">
+              <label class="checkbox-label"><input type="checkbox" name="enabled" checked /> Enabled</label>
+              <button type="submit" class="primary-btn">Add Site</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="manage-panel">
+          <div id="message-container"></div>
+          <div class="table-wrapper manage-table-wrapper">
+            <table class="manage-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>URL</th>
+                  <th>Category</th>
+                  <th>Expected</th>
+                  <th>Interval</th>
+                  <th>Timeout</th>
+                  <th>Enabled</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="sites-body">
+                <tr><td colspan="8" class="empty-state">Loading sites…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Cairn University Technology Services &mdash; Internal Use Only</span>
+    <span id="footer-clock"></span>
+  </footer>
+
+  <div id="confirm-modal" class="confirm-modal hidden" aria-hidden="true">
+    <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+      <div class="confirm-title" id="confirm-title">Confirm action</div>
+      <div class="confirm-message" id="confirm-message"></div>
+      <div class="confirm-actions">
+        <button type="button" id="confirm-cancel" class="secondary-btn">Cancel</button>
+        <button type="button" id="confirm-confirm" class="primary-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/manage-sites.js"></script>
+</body>
+</html>

@@ -8,6 +8,7 @@
 </head>
 <body class="login-page">
 
+  <!-- Signup page for new user registration. -->
   <div class="login-wrapper">
     <div class="login-card">
 
@@ -21,6 +22,7 @@
       <h1 class="login-title" style="text-align: center;" >Create account</h1>
       <p class="login-desc" style="text-align: center;">Use your Cairn Email and Password to sign up.</p>
 
+      <!-- Error banner displays signup validation feedback. -->
       <div id="error-msg" class="error-banner" style="display:none"></div>
 
       <form method="POST" action="/signup" class="login-form">
@@ -52,6 +54,7 @@
   </div>
 
   <script>
+    // Display any signup validation error passed through the query string.
     const params = new URLSearchParams(location.search);
     const err    = params.get("error");
     const banner = document.getElementById("error-msg");

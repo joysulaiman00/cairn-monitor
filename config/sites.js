@@ -1,34 +1,14 @@
-const sites = [
-  {
-    id: "cairn-main",
-    name: "Cairn University Main Site",
-    url: "https://cairn.edu",
-    category: "main",
-    checkInterval: 60,
-    expectedStatus: 200,
-    timeout: 10000,
-    enabled: true,
-  },
-  {
-    id: "cairn-elearning",
-    name: "Cairn eLearning",
-    url: "https://elearning.cairn.edu",
-    category: "academics",
-    checkInterval: 60,
-    expectedStatus: 200,
-    timeout: 10000,
-    enabled: true,
-  },
-  {
-    id: "cairn-selfservice",
-    name: "Cairn Self Service",
-    url: "https://selfservice.cairn.edu",
-    category: "student-services",
-    checkInterval: 60,
-    expectedStatus: 200,
-    timeout: 10000,
-    enabled: true,
-  },
-];
+const fs = require("fs");
+const path = require("path");
+const SITES_FILE = path.join(__dirname, "sites.json");
 
-module.exports = sites;
+function loadSites() {
+  if (!fs.existsSync(SITES_FILE)) return [];
+  try {
+    return JSON.parse(fs.readFileSync(SITES_FILE, "utf8"));
+  } catch {
+    return [];
+  }
+}
+
+module.exports = loadSites();

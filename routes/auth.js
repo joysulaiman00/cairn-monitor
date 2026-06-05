@@ -1,3 +1,4 @@
+// Authentication and user management routes.
 const express = require("express");
 const bcrypt  = require("bcryptjs");
 const fs      = require("fs");
@@ -7,17 +8,20 @@ const { requireGuest } = require("../middleware/auth");
 const router    = express.Router();
 const USERS_FILE = path.join(__dirname, "../config/users.json");
 
+// Reads the JSON user store from disk safely.
 function loadUsers() {
   try { return JSON.parse(fs.readFileSync(USERS_FILE, "utf8")); }
   catch { return []; }
 }
 
 // GET /login
+// Displays the login page for users who are not already authenticated.
 router.get("/login", requireGuest, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/login.html"));
 });
 
 // POST /login
+// Accepts credentials, verifies them, and creates a session.
 router.post("/login", requireGuest, async (req, res) => {
   const { username, password } = req.body;
 
@@ -29,7 +33,7 @@ router.post("/login", requireGuest, async (req, res) => {
   const user  = users.find(u => u.username.toLowerCase() === username.toLowerCase());
 
   if (!user) {
-    // Constant-time fake compare to prevent user enumeration
+    // Constant-time fake compare to prevent user enumeration.
     await bcrypt.compare(password, "$2b$12$invalidhashfortimingprotection00000000000000000000000");
     return res.redirect("/login?error=invalid");
   }
@@ -47,11 +51,13 @@ router.post("/login", requireGuest, async (req, res) => {
 });
 
 // GET /signup
+// Renders the signup form for new users.
 router.get("/signup", requireGuest, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/signup.html"));
 });
 
 // POST /signup
+// Creates a new user account and starts a session.
 router.post("/signup", requireGuest, async (req, res) => {
   const { name, username, password, confirmPassword } = req.body;
 
@@ -94,6 +100,7 @@ router.post("/signup", requireGuest, async (req, res) => {
 });
 
 // POST /logout
+// Ends the user session and returns them to the login page.
 router.post("/logout", (req, res) => {
   req.session.destroy(() => {
     res.clearCookie("connect.sid");
