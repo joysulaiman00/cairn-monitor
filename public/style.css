@@ -14,8 +14,8 @@
   --surface:    #f9faff;
   --surface2:   #bdb8b8;
   --border:     #222d45;
-  --text:       #000000;
-  --muted:      #000000;
+  --text:       #1a1a1a;
+  --muted:      #666666;
   --font:       'Segoe UI', system-ui, sans-serif;
 }
 
@@ -114,7 +114,7 @@ main {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: white;
+  color: #ffffff;
   margin-bottom: 1rem;
 }
 
@@ -143,7 +143,7 @@ main {
 .summary-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #1a1a1a;
   line-height: 1;
 }
 
@@ -266,7 +266,7 @@ main {
   align-items: center;
   display: inline-flex;
   gap: 0.5rem;
-  color: #fff;
+  color: #1a1a1a;
 }
 
 .form-row label {
@@ -283,7 +283,7 @@ main {
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 10px;
-  color: white;
+  color: #1a1a1a;
   padding: 0.8rem 0.95rem;
 }
 
@@ -322,10 +322,10 @@ main {
 
 .manage-input {
   width: 100%;
-  background: var(--bg);
+  background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 10px;
-  color: white;
+  color: #1a1a1a;
   padding: 0.6rem 0.75rem;
 }
 
@@ -388,7 +388,7 @@ main {
 .confirm-title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: white;
+  color: #1a1a1a;
   margin-bottom: 0.85rem;
 }
 
@@ -462,7 +462,7 @@ main {
 .card-name {
   font-size: 1.05rem;
   font-weight: 600;
-  color: #fff;
+  color: #1a1a1a;
 }
 
 .card-category {
@@ -495,7 +495,7 @@ main {
 .stat-value {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #1a1a1a;
 }
 
 .stat-label {
@@ -563,7 +563,7 @@ tbody tr {
 
 tbody tr:hover { background: var(--surface2); }
 
-.td-site-name { font-weight: 600; color: #fff; }
+.td-site-name { font-weight: 600; color: #1a1a1a; }
 .td-url       { font-size: 0.75rem; color: var(--muted); }
 
 .td-category {
@@ -715,7 +715,7 @@ footer {
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 8px;
-  color: #ffffff;
+  color: #1a1a1a;
   font-size: 0.95rem;
   padding: 0.7rem 0.9rem;
   outline: none;
