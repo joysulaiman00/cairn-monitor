@@ -38,12 +38,17 @@ app.use(express.static(path.join(__dirname, "public"), { index: false }));
 
 // Security headers and Content Security Policy.
 app.use(helmet({
+  hsts: false,
   contentSecurityPolicy: {
+    useDefaults: false,
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc:  ["'self'"],
       styleSrc:   ["'self'", "'unsafe-inline'"],
       connectSrc: ["'self'", "ws:", "wss:"],
+      imgSrc:     ["'self'", "data:"],
+      formAction: ["'self'"],
+      baseUri:    ["'self'"],
     },
   },
 }));
