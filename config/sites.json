@@ -4,7 +4,7 @@
     "name": "Cairn University Main Site",
     "url": "https://cairn.edu",
     "category": "main",
-    "checkInterval": 60,
+    "checkInterval": 15,
     "expectedStatus": 200,
     "timeout": 10000,
     "enabled": true
@@ -14,7 +14,7 @@
     "name": "Cairn eLearning",
     "url": "https://elearning.cairn.edu",
     "category": "academics",
-    "checkInterval": 60,
+    "checkInterval": 15,
     "expectedStatus": 200,
     "timeout": 10000,
     "enabled": true
@@ -24,7 +24,7 @@
     "name": "Cairn Self Service",
     "url": "https://selfservice.cairn.edu",
     "category": "student-services",
-    "checkInterval": 60,
+    "checkInterval": 15,
     "expectedStatus": 200,
     "timeout": 10000,
     "enabled": true
