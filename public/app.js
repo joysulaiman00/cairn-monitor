@@ -10,6 +10,26 @@ const statAvg     = document.getElementById("stat-avg");
 const statUpdated = document.getElementById("stat-updated");
 const footerClock = document.getElementById("footer-clock");
 
+// History modal UI.
+const historyBtn        = document.getElementById("history-btn");
+const historyModal      = document.getElementById("history-modal");
+const historyClose      = document.getElementById("history-modal-close");
+const historySiteSelect = document.getElementById("history-site-select");
+const historyRangeSelect= document.getElementById("history-range-select");
+const historyRefreshBtn = document.getElementById("history-refresh-btn");
+const historyEmptyState = document.getElementById("history-empty-state");
+const historyAvailability = document.getElementById("history-availability");
+const historyAvgResponse  = document.getElementById("history-avg-response");
+const historyCheckCount   = document.getElementById("history-check-count");
+const historyChartCanvas  = document.getElementById("history-chart");
+let historyChart;
+
+const historyState = {
+  sitesLoaded: false,
+  activeSiteId: null,
+  activeRange: 24,
+};
+
 // ─── Clock ────────────────────────────────────────────────────────────────────
 
 function updateClock() {
@@ -53,6 +73,180 @@ function updateSummary(results) {
     hour: "2-digit", minute: "2-digit", second: "2-digit",
   });
 }
+
+function openHistoryModal() {
+  historyModal.dataset.open = "true";
+  historyModal.setAttribute("aria-hidden", "false");
+  if (!historyState.sitesLoaded) loadHistorySites();
+  if (!historyState.activeSiteId) {
+    historyState.activeRange = Number(historyRangeSelect.value);
+  }
+}
+
+function closeHistoryModal() {
+  historyModal.dataset.open = "false";
+  historyModal.setAttribute("aria-hidden", "true");
+}
+
+async function loadHistorySites() {
+  try {
+    const res = await fetch("/api/sites");
+    if (!res.ok) throw new Error("Failed to load sites");
+    const sites = await res.json();
+    historySiteSelect.innerHTML = sites.map(site => `
+      <option value="${site.id}">${site.name}</option>
+    `).join("");
+    historyState.sitesLoaded = true;
+    historyState.activeSiteId = sites[0]?.id || null;
+    if (historyState.activeSiteId) {
+      historySiteSelect.value = historyState.activeSiteId;
+      await loadHistoryData();
+    }
+  } catch (err) {
+    historyEmptyState.textContent = "Could not load site list. Try again later.";
+  }
+}
+
+function buildHistorySummary(points) {
+  if (!points.length) {
+    historyAvailability.textContent = "—";
+    historyAvgResponse.textContent = "—";
+    historyCheckCount.textContent = "0";
+    return;
+  }
+
+  const total = points.length;
+  const upCount = points.filter(point => point.ok).length;
+  const avgTime = points.filter(point => point.responseTime != null).reduce((sum, point) => sum + point.responseTime, 0) / points.filter(point => point.responseTime != null).length;
+
+  historyAvailability.textContent = `${Math.round((upCount / total) * 100)}%`;
+  historyAvgResponse.textContent = Number.isFinite(avgTime) ? `${Math.round(avgTime)}ms` : "—";
+  historyCheckCount.textContent = `${total}`;
+}
+
+function renderHistoryChart(points) {
+  const labels = points.map(point => new Date(point.checkedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }));
+  const responseData = points.map(point => point.responseTime ?? null);
+  const statusData = points.map((point, index) => point.ok ? null : { x: labels[index], y: 0 });
+
+  if (!historyChart) {
+    historyChart = new Chart(historyChartCanvas, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Response Time",
+            data: responseData,
+            borderColor: "#7a1f2e",
+            backgroundColor: "rgba(122,31,46,0.15)",
+            spanGaps: true,
+            tension: 0.2,
+            pointRadius: 3,
+            pointBackgroundColor: "#7a1f2e",
+          },
+          {
+            label: "Down",
+            data: statusData.filter(Boolean),
+            type: "scatter",
+            backgroundColor: "rgba(239,68,68,0.85)",
+            borderColor: "rgba(239,68,68,0.95)",
+            pointRadius: 6,
+            showLine: false,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: "nearest",
+          intersect: false,
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label(context) {
+                const idx = context.dataIndex;
+                const point = points[idx];
+                if (!point) return "No data";
+                return ` ${point.ok ? "Online" : "Offline"} — ${point.responseTime != null ? `${point.responseTime}ms` : point.error || point.status}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            title: { display: true, text: "Time" },
+            ticks: { color: "#1a1a1a" },
+            grid: { color: "rgba(0,0,0,0.08)" },
+          },
+          y: {
+            title: { display: true, text: "Response Time (ms)" },
+            ticks: { color: "#1a1a1a" },
+            grid: { color: "rgba(0,0,0,0.08)" },
+          },
+        },
+      },
+    });
+  } else {
+    historyChart.data.labels = labels;
+    historyChart.data.datasets[0].data = responseData;
+    historyChart.data.datasets[1].data = statusData.filter(Boolean);
+    historyChart.update();
+  }
+}
+
+async function loadHistoryData() {
+  const siteId = historySiteSelect.value;
+  const hours = Number(historyRangeSelect.value);
+  if (!siteId) return;
+
+  historyEmptyState.textContent = "Loading history…";
+  historyEmptyState.style.display = "flex";
+
+  try {
+    const since = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+    const res = await fetch(`/api/sites/${encodeURIComponent(siteId)}/history?since=${encodeURIComponent(since)}`);
+    if (!res.ok) {
+      if (res.status === 404) {
+        historyEmptyState.textContent = "History data is not available yet.";
+      } else {
+        historyEmptyState.textContent = "Failed to load history. Try again.";
+      }
+      return;
+    }
+    const data = await res.json();
+    const points = data.points || [];
+    if (!points.length) {
+      historyEmptyState.textContent = "No history available for this site and time range.";
+      return;
+    }
+    historyEmptyState.style.display = "none";
+    buildHistorySummary(points);
+    renderHistoryChart(points);
+  } catch (err) {
+    historyEmptyState.textContent = "Unable to load history. Check your connection.";
+  }
+}
+
+function attachHistoryEvents() {
+  historyBtn.addEventListener("click", openHistoryModal);
+  historyClose.addEventListener("click", closeHistoryModal);
+  historyRefreshBtn.addEventListener("click", loadHistoryData);
+  historySiteSelect.addEventListener("change", loadHistoryData);
+  historyRangeSelect.addEventListener("change", loadHistoryData);
+  historyModal.addEventListener("click", (event) => {
+    if (event.target.dataset.close === "true") closeHistoryModal();
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && historyModal.dataset.open === "true") {
+      closeHistoryModal();
+    }
+  });
+}
+
+attachHistoryEvents();
 
 // ─── Cards ────────────────────────────────────────────────────────────────────
 

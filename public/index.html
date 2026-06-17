@@ -15,6 +15,9 @@
         <div>
         </div>
       </div>
+      <div class="header-actions">
+        <button type="button" id="history-btn" class="secondary-btn">History</button>
+      </div>
       <div class="live-badge">
         <span class="live-dot"></span>
         LIVE
@@ -91,6 +94,55 @@
     <span id="footer-clock"></span>
   </footer>
 
+  <div class="history-modal" id="history-modal" aria-hidden="true">
+    <div class="history-modal-overlay" data-close="true"></div>
+    <div class="history-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="history-modal-title">
+      <div class="history-modal-header">
+        <div>
+          <p class="section-title" id="history-modal-title">Site History</p>
+          <p class="history-modal-subtitle">View uptime and response trends for the last 24 hours.</p>
+        </div>
+        <button type="button" class="history-modal-close" id="history-modal-close">×</button>
+      </div>
+      <div class="history-modal-body">
+        <div class="history-form-row">
+          <label for="history-site-select">Site</label>
+          <select id="history-site-select"></select>
+        </div>
+        <div class="history-form-row">
+          <label for="history-range-select">Time window</label>
+          <select id="history-range-select">
+            <option value="1">Last 1 hour</option>
+            <option value="6">Last 6 hours</option>
+            <option value="24" selected>Last 24 hours</option>
+          </select>
+        </div>
+        <div class="history-summary-grid" id="history-summary-grid">
+          <div class="history-summary-card">
+            <span class="history-summary-label">Availability</span>
+            <span class="history-summary-value" id="history-availability">—</span>
+          </div>
+          <div class="history-summary-card">
+            <span class="history-summary-label">Avg Response</span>
+            <span class="history-summary-value" id="history-avg-response">—</span>
+          </div>
+          <div class="history-summary-card">
+            <span class="history-summary-label">Checks</span>
+            <span class="history-summary-value" id="history-check-count">—</span>
+          </div>
+        </div>
+        <div class="history-chart-wrapper">
+          <canvas id="history-chart"></canvas>
+          <div class="history-chart-empty" id="history-empty-state">Select a site and range to load history.</div>
+        </div>
+      </div>
+      <div class="history-modal-footer">
+        <button type="button" class="secondary-btn" id="history-refresh-btn">Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

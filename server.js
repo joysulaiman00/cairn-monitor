@@ -89,6 +89,24 @@ app.use("/app.js",    express.static(path.join(__dirname, "public/app.js")));
 // Mount authentication routes: login, signup, and logout.
 app.use(authRouter);
 
+app.get("/api/sites/:id/history", requireAuth, (req, res) => {
+  const siteId = req.params.id;
+  const since  = req.query.since;
+  if (!since) return res.status(400).json({ message: "Missing since query parameter." });
+
+  const points = loadHistoryPoints(siteId, since);
+  if (points === null) return res.status(400).json({ message: "Invalid since timestamp." });
+
+  const aggregated = aggregateHistoryPoints(points, 240);
+  res.json({ siteId, points: aggregated.points, aggregated: aggregated.aggregated, bucketMs: aggregated.bucketMs });
+});
+
+app.get("/api/sites/:id/history/meta", requireAuth, (req, res) => {
+  const siteId = req.params.id;
+  const meta = getHistoryMeta(siteId);
+  res.json({ siteId, ...meta, ranges: [1, 6, 24] });
+});
+
 // All routes below this middleware require an authenticated user.
 app.use(requireAuth);
 
@@ -250,6 +268,106 @@ function monthlyFilename() {
 function readMonthlyFile(filePath) {
   if (!fs.existsSync(filePath)) return [];
   try { return JSON.parse(fs.readFileSync(filePath, "utf8")); } catch { return []; }
+}
+
+function loadHistoryPoints(siteId, since) {
+  const cutoff = new Date(since);
+  if (Number.isNaN(cutoff.getTime())) return null;
+
+  let files = [];
+  try { files = fs.readdirSync(DATA_DIR); } catch { return []; }
+
+  const points = [];
+  for (const file of files) {
+    if (!/^results-\d{4}-\d{2}\.json$/.test(file)) continue;
+    const records = readMonthlyFile(path.join(DATA_DIR, file));
+    for (const record of records) {
+      if (record.siteId !== siteId) continue;
+      const checkedAt = new Date(record.checkedAt);
+      if (Number.isNaN(checkedAt.getTime()) || checkedAt < cutoff) continue;
+      points.push(record);
+    }
+  }
+
+  return points.sort((a, b) => new Date(a.checkedAt) - new Date(b.checkedAt));
+}
+
+function getHistoryMeta(siteId) {
+  let files = [];
+  try { files = fs.readdirSync(DATA_DIR); } catch { return { earliest: null, latest: null, totalPoints: 0 }; }
+
+  let earliest = null;
+  let latest = null;
+  let totalPoints = 0;
+
+  for (const file of files) {
+    if (!/^results-\d{4}-\d{2}\.json$/.test(file)) continue;
+    const records = readMonthlyFile(path.join(DATA_DIR, file));
+    for (const record of records) {
+      if (record.siteId !== siteId) continue;
+      const checkedAt = new Date(record.checkedAt);
+      if (Number.isNaN(checkedAt.getTime())) continue;
+      totalPoints += 1;
+      if (!earliest || checkedAt < earliest) earliest = checkedAt;
+      if (!latest || checkedAt > latest) latest = checkedAt;
+    }
+  }
+
+  return {
+    earliest: earliest ? earliest.toISOString() : null,
+    latest: latest ? latest.toISOString() : null,
+    totalPoints,
+  };
+}
+
+function aggregateHistoryPoints(points, maxPoints = 240) {
+  if (points.length <= maxPoints) {
+    return { points, aggregated: false, bucketMs: null };
+  }
+
+  const startTime = new Date(points[0].checkedAt).getTime();
+  const endTime = new Date(points[points.length - 1].checkedAt).getTime();
+  const bucketMs = Math.max(1, Math.ceil((endTime - startTime) / maxPoints));
+  const buckets = [];
+
+  for (const record of points) {
+    const timestamp = new Date(record.checkedAt).getTime();
+    const bucketIndex = Math.floor((timestamp - startTime) / bucketMs);
+    if (!buckets[bucketIndex]) {
+      buckets[bucketIndex] = {
+        checkedAt: new Date(startTime + bucketIndex * bucketMs).toISOString(),
+        count: 0,
+        downCount: 0,
+        responseTotal: 0,
+        responseCount: 0,
+        lastRecord: null,
+      };
+    }
+
+    const bucket = buckets[bucketIndex];
+    bucket.count += 1;
+    if (!record.ok) bucket.downCount += 1;
+    if (record.responseTime != null) {
+      bucket.responseTotal += record.responseTime;
+      bucket.responseCount += 1;
+    }
+    bucket.lastRecord = record;
+  }
+
+  const aggregated = buckets.map((bucket) => {
+    const last = bucket.lastRecord || {};
+    return {
+      checkedAt: bucket.checkedAt,
+      ok: bucket.downCount === 0,
+      count: bucket.count,
+      downCount: bucket.downCount,
+      responseTime: bucket.responseCount ? Math.round(bucket.responseTotal / bucket.responseCount) : null,
+      status: bucket.downCount === 0 ? last.status ?? null : last.status ?? null,
+      error: bucket.downCount > 0 ? last.error : undefined,
+    };
+  });
+
+  return { points: aggregated, aggregated: true, bucketMs };
 }
 
 function appendResult(record) {
