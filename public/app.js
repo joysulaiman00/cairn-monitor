@@ -21,6 +21,9 @@ const historyEmptyState = document.getElementById("history-empty-state");
 const historyAvailability = document.getElementById("history-availability");
 const historyAvgResponse  = document.getElementById("history-avg-response");
 const historyCheckCount   = document.getElementById("history-check-count");
+const historyEarliest     = document.getElementById("history-earliest");
+const historyLatest       = document.getElementById("history-latest");
+const historyRanges       = document.getElementById("history-ranges");
 const historyChartCanvas  = document.getElementById("history-chart");
 let historyChart;
 
@@ -100,10 +103,31 @@ async function loadHistorySites() {
     historyState.activeSiteId = sites[0]?.id || null;
     if (historyState.activeSiteId) {
       historySiteSelect.value = historyState.activeSiteId;
+      await loadHistoryMeta(historyState.activeSiteId);
       await loadHistoryData();
     }
   } catch (err) {
     historyEmptyState.textContent = "Could not load site list. Try again later.";
+  }
+}
+
+async function loadHistoryMeta(siteId) {
+  if (!siteId) return;
+  try {
+    const res = await fetch(`/api/sites/${encodeURIComponent(siteId)}/history/meta`);
+    if (!res.ok) throw new Error("Failed to load history metadata");
+    const meta = await res.json();
+    historyEarliest.textContent = meta.earliest ? new Date(meta.earliest).toLocaleString() : "—";
+    historyLatest.textContent = meta.latest ? new Date(meta.latest).toLocaleString() : "—";
+    historyRanges.textContent = Array.isArray(meta.ranges) ? meta.ranges.map(r => `${r}h`).join(", ") : "—";
+    historyRangeSelect.innerHTML = (meta.ranges || [1, 6, 24]).map(value => `
+      <option value="${value}" ${value === 24 ? "selected" : ""}>Last ${value} hour${value === 1 ? "" : "s"}</option>
+    `).join("");
+    historyState.activeRange = Number(historyRangeSelect.value);
+  } catch (err) {
+    historyEarliest.textContent = "—";
+    historyLatest.textContent = "—";
+    historyRanges.textContent = "—";
   }
 }
 
@@ -234,7 +258,10 @@ function attachHistoryEvents() {
   historyBtn.addEventListener("click", openHistoryModal);
   historyClose.addEventListener("click", closeHistoryModal);
   historyRefreshBtn.addEventListener("click", loadHistoryData);
-  historySiteSelect.addEventListener("change", loadHistoryData);
+  historySiteSelect.addEventListener("change", async () => {
+    await loadHistoryMeta(historySiteSelect.value);
+    await loadHistoryData();
+  });
   historyRangeSelect.addEventListener("change", loadHistoryData);
   historyModal.addEventListener("click", (event) => {
     if (event.target.dataset.close === "true") closeHistoryModal();
