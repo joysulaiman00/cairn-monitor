@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cairn University — Site History</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <img src="/images/Cairn_Logo_337_X_100.webp" alt="Cairn University Logo" style="height: 48px; width: auto;">
+      </div>
+      <div class="header-actions">
+        <a href="/" class="secondary-btn">Dashboard</a>
+      </div>
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        LIVE
+      </div>
+      <form action="/logout" method="POST">
+        <button type="submit" class="logout-btn">Logout</button>
+      </form>
+    </div>
+  </header>
+
+  <main>
+    <section class="cards-section">
+      <div class="section-heading">
+        <h2 class="section-title">Site History</h2>
+      </div>
+
+      <div class="history-page-controls">
+        <div class="history-form-row">
+          <label for="history-site-select">Site</label>
+          <select id="history-site-select"></select>
+        </div>
+        <div class="history-form-row">
+          <label for="history-range-select">Time window</label>
+          <select id="history-range-select">
+            <option value="1">Last 1 hour</option>
+            <option value="6">Last 6 hours</option>
+            <option value="24" selected>Last 24 hours</option>
+          </select>
+        </div>
+        <div class="history-form-row">
+          <label for="history-buckets">Resolution</label>
+          <select id="history-buckets">
+            <option value="240">Auto (recommended)</option>
+            <option value="120">Higher aggregation (120)</option>
+            <option value="480">Finer (480)</option>
+            <option value="0">Raw (no aggregation)</option>
+          </select>
+        </div>
+        <div style="align-self:end">
+          <button id="history-refresh-btn" class="secondary-btn">Refresh</button>
+        </div>
+      </div>
+
+      <div class="history-meta-grid" style="margin-top:1rem;">
+        <div class="history-meta-card">
+          <span class="history-meta-label">Earliest record</span>
+          <span class="history-meta-value" id="history-earliest">—</span>
+        </div>
+        <div class="history-meta-card">
+          <span class="history-meta-label">Latest record</span>
+          <span class="history-meta-value" id="history-latest">—</span>
+        </div>
+        <div class="history-meta-card">
+          <span class="history-meta-label">Available ranges</span>
+          <span class="history-meta-value" id="history-ranges">—</span>
+        </div>
+      </div>
+
+      <div class="history-summary-grid" style="margin-top:1rem;">
+        <div class="history-summary-card">
+          <span class="history-summary-label">Availability</span>
+          <span class="history-summary-value" id="history-availability">—</span>
+        </div>
+        <div class="history-summary-card">
+          <span class="history-summary-label">Avg Response</span>
+          <span class="history-summary-value" id="history-avg-response">—</span>
+        </div>
+        <div class="history-summary-card">
+          <span class="history-summary-label">Checks</span>
+          <span class="history-summary-value" id="history-check-count">—</span>
+        </div>
+      </div>
+
+      <div class="history-chart-wrapper" style="margin-top:1rem;">
+        <canvas id="history-chart"></canvas>
+        <div class="history-chart-empty" id="history-empty-state">Select a site and range to load history.</div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <span>Cairn University Technology Services &mdash; Internal Use Only</span>
+    <span id="footer-clock"></span>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="/history-common.js"></script>
+  <script src="/history.js"></script>
+</body>
+</html>

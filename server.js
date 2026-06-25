@@ -97,7 +97,9 @@ app.get("/api/sites/:id/history", requireAuth, (req, res) => {
   const points = loadHistoryPoints(siteId, since);
   if (points === null) return res.status(400).json({ message: "Invalid since timestamp." });
 
-  const aggregated = aggregateHistoryPoints(points, 240);
+  // Allow the client to request a target number of buckets (smaller => more aggregation)
+  const targetBuckets = req.query.buckets ? Number(req.query.buckets) : 240;
+  const aggregated = aggregateHistoryPoints(points, Number.isFinite(targetBuckets) && targetBuckets > 0 ? targetBuckets : 240);
   res.json({ siteId, points: aggregated.points, aggregated: aggregated.aggregated, bucketMs: aggregated.bucketMs });
 });
 
@@ -117,6 +119,10 @@ app.get("/", (req, res) => {
 
 app.get("/manage-sites", (req, res) => {
   res.sendFile(path.join(__dirname, "pages/manage-sites.html"));
+});
+
+app.get('/history', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'pages', 'history.html'));
 });
 
 app.get("/api/sites", (req, res) => {

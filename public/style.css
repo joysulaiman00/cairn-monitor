@@ -52,65 +52,6 @@ header {
   gap: 0.75rem;
 }
 
-.history-modal {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.history-modal[data-open="true"] {
-  display: flex;
-}
-
-.history-modal-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-}
-
-.history-modal-dialog {
-  position: relative;
-  width: min(960px, calc(100% - 2rem));
-  max-height: calc(100vh - 3rem);
-  overflow: auto;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  padding: 1.5rem;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.24);
-}
-
-.history-modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.history-modal-close {
-  background: none;
-  border: none;
-  color: var(--text);
-  font-size: 1.75rem;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0.35rem 0.75rem;
-}
-
-.history-modal-subtitle {
-  color: var(--muted);
-  font-size: 0.95rem;
-  margin-top: 0.2rem;
-}
-
-.history-modal-body {
-  display: grid;
-  gap: 1rem;
-}
 
 .history-form-row {
   display: grid;
@@ -217,12 +158,6 @@ header {
   color: var(--muted);
   font-size: 0.96rem;
   text-align: center;
-}
-
-.history-modal-footer {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: flex-end;
 }
 
 .history-btn {
