@@ -1,5 +1,12 @@
 // History page script — mirrors the modal logic but for a standalone page.
 document.addEventListener("DOMContentLoaded", () => {
+  // Ensure the history common helper is loaded
+  if (!window.historyCommon) {
+    console.error('historyCommon helper not loaded!');
+    document.getElementById("history-empty-state").textContent = 'Error: helper script failed to load.';
+    return;
+  }
+  
   const siteSelect = document.getElementById("history-site-select");
   const rangeSelect = document.getElementById("history-range-select");
   const bucketsSelect = document.getElementById("history-buckets");
@@ -47,75 +54,82 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function render(points) {
-    // Data as time-series objects for Chart.js time scale
-    const responsePoints = points.map(p => ({ x: p.checkedAt, y: p.responseTime != null ? p.responseTime : null }));
-    const downPoints = points.filter(p => !p.ok).map(p => ({ x: p.checkedAt, y: 0 }));
+    // Generate labels (time strings) and simple numeric indices for x-axis
+    const labels = points.map(p => new Date(p.checkedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+    const responseData = points.map(p => p.responseTime ?? null);
+    const downData = points.map((p, i) => p.ok ? null : { x: i, y: 0 });
 
     const yMax = window.historyCommon.suggestYAxisMax(points);
 
-    if (!chart) {
-      chart = new Chart(canvas, {
-        type: 'line',
-        data: {
-          datasets: [
-            {
-              label: 'Response Time',
-              data: responsePoints,
-              borderColor: '#7a1f2e',
-              backgroundColor: 'rgba(122,31,46,0.12)',
-              spanGaps: true,
-              tension: 0.2,
-              pointRadius: 0,
-              pointHoverRadius: 6,
-            },
-            {
-              label: 'Down',
-              data: downPoints,
-              type: 'scatter',
-              backgroundColor: 'rgba(239,68,68,0.85)',
-              borderColor: 'rgba(239,68,68,0.95)',
-              pointRadius: 6,
-              showLine: false,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'nearest', intersect: false },
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label(context) {
-                  const p = context.raw;
-                  if (!p) return 'No data';
-                  if (p.y == null) return 'No response';
-                  return `${p.y}ms`;
+    try {
+      if (!chart) {
+        chart = new Chart(canvas, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'Response Time',
+                data: responseData,
+                borderColor: '#7a1f2e',
+                backgroundColor: 'rgba(122,31,46,0.12)',
+                spanGaps: true,
+                tension: 0.2,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                fill: false,
+              },
+              {
+                label: 'Down',
+                data: downData.filter(Boolean),
+                type: 'scatter',
+                backgroundColor: 'rgba(239,68,68,0.85)',
+                borderColor: 'rgba(239,68,68,0.95)',
+                pointRadius: 6,
+                showLine: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'nearest', intersect: false },
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label(context) {
+                    if (context.dataset.label === 'Down') return 'Offline';
+                    const v = context.parsed?.y;
+                    return v != null ? `${v}ms` : 'No data';
+                  }
                 }
               }
-            }
-          },
-          scales: {
-            x: {
-              type: 'time',
-              time: { tooltipFormat: 'MMM d, HH:mm', displayFormats: { hour: 'HH:mm', minute: 'HH:mm' } },
-              title: { display: true, text: 'Time' },
-              grid: { color: 'rgba(0,0,0,0.06)' },
             },
-            y: {
-              title: { display: true, text: 'Response Time (ms)' },
-              suggestedMax: yMax,
-              beginAtZero: true,
-              grid: { color: 'rgba(0,0,0,0.06)' },
+            scales: {
+              x: {
+                title: { display: true, text: 'Time' },
+                grid: { color: 'rgba(0,0,0,0.06)' },
+              },
+              y: {
+                title: { display: true, text: 'Response Time (ms)' },
+                suggestedMax: yMax,
+                beginAtZero: true,
+                grid: { color: 'rgba(0,0,0,0.06)' },
+              }
             }
           }
-        }
-      });
-    } else {
-      chart.data.datasets[0].data = responsePoints;
-      chart.data.datasets[1].data = downPoints;
-      chart.options.scales.y.suggestedMax = yMax;
-      chart.update();
+        });
+      } else {
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = responseData;
+        chart.data.datasets[1].data = downData.filter(Boolean);
+        chart.options.scales.y.suggestedMax = yMax;
+        chart.update();
+      }
+    } catch (err) {
+      console.error('Chart render failed:', err);
+      emptyState.textContent = 'Chart rendering failed. Check browser console.';
+      emptyState.style.display = 'flex';
     }
   }
 
@@ -123,26 +137,38 @@ document.addEventListener("DOMContentLoaded", () => {
     const siteId = siteSelect.value;
     const hours = Number(rangeSelect.value);
     const buckets = Number(bucketsSelect.value);
-    emptyState.textContent = 'Loading...'; emptyState.style.display = 'flex';
-      try {
-        const since = new Date(Date.now() - hours*60*60*1000).toISOString();
-        const q = new URLSearchParams({ since });
-        // Interpret bucketsSelect value: 0 => raw, '240' means Auto (use helper)
-        let useBuckets = buckets;
-        if (buckets === 240) {
-          useBuckets = window.historyCommon.getBucketCountForRange(hours);
-        }
-        if (useBuckets > 0) q.set('buckets', String(useBuckets));
-        const res = await fetch(`/api/sites/${encodeURIComponent(siteId)}/history?${q.toString()}`);
-      if (!res.ok) { emptyState.textContent = 'No history'; return; }
+    emptyState.textContent = 'Loading...'; 
+    emptyState.style.display = 'flex';
+    try {
+      const since = new Date(Date.now() - hours*60*60*1000).toISOString();
+      const q = new URLSearchParams({ since });
+      // Interpret bucketsSelect value: 0 => raw, '240' means Auto (use helper)
+      let useBuckets = buckets;
+      if (buckets === 240) {
+        useBuckets = window.historyCommon.getBucketCountForRange(hours);
+      }
+      if (useBuckets > 0) q.set('buckets', String(useBuckets));
+      const url = `/api/sites/${encodeURIComponent(siteId)}/history?${q.toString()}`;
+      console.log('Fetching history:', url);
+      const res = await fetch(url);
+      if (!res.ok) { 
+        console.error('History fetch failed:', res.status, res.statusText);
+        emptyState.textContent = `Failed: ${res.status} ${res.statusText}`; 
+        return; 
+      }
       const data = await res.json();
+      console.log('Received', data.points?.length || 0, 'history points');
       const points = data.points || [];
-      if (!points.length) { emptyState.textContent = 'No history for this range.'; return; }
+      if (!points.length) { 
+        emptyState.textContent = 'No history for this range.'; 
+        return; 
+      }
       emptyState.style.display = 'none';
       buildSummary(points);
       render(points);
-    } catch (e) {
-      emptyState.textContent = 'Failed to load data.';
+    } catch (err) {
+      console.error('loadData error:', err);
+      emptyState.textContent = `Error: ${err.message}`; 
     }
   }
 

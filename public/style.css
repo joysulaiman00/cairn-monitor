@@ -136,16 +136,20 @@ header {
 
 .history-chart-wrapper {
   position: relative;
-  min-height: 320px;
+  min-height: 400px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .history-chart-wrapper canvas {
+  max-width: 100% !important;
+  max-height: 350px !important;
   width: 100% !important;
-  height: 300px !important;
+  height: 350px !important;
 }
 
 .history-chart-empty {
